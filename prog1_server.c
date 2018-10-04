@@ -11,8 +11,9 @@
  #include <string.h>
  #include <stdlib.h>
  #include <unistd.h>
+#include <wait.h>
 
- #define QLEN 6 /* size of request queue */
+#define QLEN 6 /* size of request queue */
  int visits = 0; /* counts client connections */
 
  /*------------------------------------------------------------------------
@@ -42,6 +43,7 @@ int main(int argc, char **argv) {
   int optval = 1; /* boolean value when we set socket option */
   char buf[1000]; /* buffer for string the server sends */
 
+
   if( argc != 2 ) {
     fprintf(stderr,"Error: Wrong number of arguments\n");
     fprintf(stderr,"usage:\n");
@@ -59,6 +61,7 @@ int main(int argc, char **argv) {
 
   port = atoi(argv[1]); /* convert argument to binary */
   char* word = argv[2];
+
   if (port > 0) { /* test for illegal value */
     //TODO: set port number. The data type is u_short
     sad.sin_port = htons(port);
@@ -101,7 +104,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"Error: Listen failed\n");
     exit(EXIT_FAILURE);
   }
-
+     pid_t pid; //process id of the child processes.
   /* Main server loop - accept and handle requests */
   while (1) {
     alen = sizeof(cad);
@@ -110,9 +113,40 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
     //TODO fork here and implement logic
+    //int status;
     visits++;
     sprintf(buf,"This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
+    send(sd2,buf,strlen(buf),0);
+    //close(sd2);
+
+    pid = fork();
+    if (pid < 0) {
+      perror("Error Fork() failure");
+    }
+      //we are in the child process.
+    else if (pid == 0) {
+
+      printf("hello from child");
+      //int numguesses = (int)strlen(word);
+      //char* displayword = malloc(sizeof(word));
+      //for (int i = 0; i < strlen(word); ++i) {
+          //displayword[i] = '_';
+      //}
+      //test: sending from the child process
+
+      sprintf(buf," forked: This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
+      send(sd2,buf,strlen(buf),0);
+      close(sd2);
+      kill(getpid(),SIGTERM);
+    }
+
+
+
+    /*
+    visits++;
+    sprintf(buf,"This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
+    //sprintf(buf,"slam");
     send(sd2, buf, strlen(buf),0);
-    close(sd2);
+    close(sd2);*/
   }
 }
