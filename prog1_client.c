@@ -26,6 +26,30 @@
 *
 *------------------------------------------------------------------------
 */
+
+void play_game(int sd) {
+    char guess;
+    uint8_t *numguesses = malloc(sizeof(uint8_t));
+    
+
+    //read the number of guesses
+    int n = read(sd,numguesses,sizeof(numguesses));
+
+    //create a word buffer with size numguesses+1 to store the word + a null terminator
+    char wordbuf[*numguesses+1];	
+
+    //read the board, wait for all 6 characters of the word binary
+    n = recv(sd,wordbuf,*numguesses,MSG_WAITALL);
+
+    //add the null terminator
+    wordbuf[*numguesses] = 0;
+
+    printf("%d\n",*numguesses);
+    //TODO: someitmes prints out random characters
+    printf("%s\n",wordbuf);
+
+}
+
 int main( int argc, char **argv) {
 	struct hostent *ptrh; /* pointer to a host table entry */
 	struct protoent *ptrp; /* pointer to a protocol table entry */
@@ -84,12 +108,16 @@ int main( int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
+
 	/* Repeatedly read data from socket and write to user's screen. */
+    play_game(sd);
+    /*
 	n = recv(sd, buf, sizeof(buf), 0);
 	while (n > 0) {
 		write(1,buf,n);
 		n = recv(sd, buf, sizeof(buf), 0);
 	}
+    */
 
 	close(sd);
 

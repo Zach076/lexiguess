@@ -32,6 +32,37 @@
  *------------------------------------------------------------------------
  */
 
+
+ /*main game loop for clients*/
+ void play_game(char* word,int c_sd){
+
+     char buffer[sizeof(word)+1];
+
+     uint8_t numguesses = (uint8_t)strlen(word);
+
+     char* displayword = malloc(sizeof(word));
+
+     for (int i = 0; i < strlen(word); ++i) {
+         displayword[i] = '_';
+     }
+
+     displayword[strlen(word)] = 0;
+
+     while(numguesses > 0) {
+         //send N
+         send(c_sd,&numguesses,sizeof(numguesses),0);
+
+         //send board
+         sprintf(buffer,"%s",displayword);
+         buffer[strlen(word)] = 0;
+
+         send(c_sd,buffer,strlen(displayword),0);
+
+         //TODO remove later
+         numguesses = 0;
+     }
+ }
+
 int main(int argc, char **argv) {
   struct protoent *ptrp; /* pointer to a protocol table entry */
   struct sockaddr_in sad; /* structure to hold server's address */
@@ -42,9 +73,11 @@ int main(int argc, char **argv) {
   int alen; /* length of address */
   int optval = 1; /* boolean value when we set socket option */
   char buf[1000]; /* buffer for string the server sends */
+  port = atoi(argv[1]); /* convert argument to binary */
+  char* word = argv[2];/*get the secret word*/
 
 
-  if( argc != 2 ) {
+  if( argc != 3 ) {
     fprintf(stderr,"Error: Wrong number of arguments\n");
     fprintf(stderr,"usage:\n");
     fprintf(stderr,"./prog1_server server_port\n");
@@ -59,8 +92,7 @@ int main(int argc, char **argv) {
   //TODO: Set local IP address to listen to all IP addresses this server can assume. You can do it by using INADDR_ANY
   sad.sin_addr.s_addr = INADDR_ANY;
 
-  port = atoi(argv[1]); /* convert argument to binary */
-  char* word = argv[2];
+
 
   if (port > 0) { /* test for illegal value */
     //TODO: set port number. The data type is u_short
@@ -114,9 +146,9 @@ int main(int argc, char **argv) {
     }
     //TODO fork here and implement logic
     //int status;
-    visits++;
-    sprintf(buf,"This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
-    send(sd2,buf,strlen(buf),0);
+    //visits++;
+    //sprintf(buf,"This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
+    //send(sd2,buf,strlen(buf),0);
     //close(sd2);
 
     pid = fork();
@@ -126,19 +158,21 @@ int main(int argc, char **argv) {
       //we are in the child process.
     else if (pid == 0) {
 
-      printf("hello from child");
-      //int numguesses = (int)strlen(word);
-      //char* displayword = malloc(sizeof(word));
-      //for (int i = 0; i < strlen(word); ++i) {
-          //displayword[i] = '_';
-      //}
       //test: sending from the child process
+      //sprintf(buf," forked: This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
+      //send(sd2,buf,strlen(buf),0);
 
-      sprintf(buf," forked: This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
-      send(sd2,buf,strlen(buf),0);
+
+      //play hangman
+      play_game(word,sd2);
+
+      //printf("hello from child");
+
       close(sd2);
-      kill(getpid(),SIGTERM);
+
+      exit(EXIT_SUCCESS);
     }
+      close(sd2);
 
 
 
