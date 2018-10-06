@@ -27,25 +27,30 @@
 *------------------------------------------------------------------------
 */
 
+#define MAXWORDSIZE 254
+
+/*main game loop for clients*/
 void play_game(int sd) {
+
     char guess;
-    uint8_t *numguesses = malloc(sizeof(uint8_t));
+    uint8_t numguesses=0;
     
 
     //read the number of guesses
-    int n = read(sd,numguesses,sizeof(numguesses));
+    int n = read(sd,&numguesses,sizeof(numguesses));
 
     //create a word buffer with size numguesses+1 to store the word + a null terminator
-    char wordbuf[*numguesses+1];	
+    char wordbuf[MAXWORDSIZE+1];
+    memset(wordbuf,0,sizeof(wordbuf)); //this essentially adds the null  terminator to the board for us.
 
     //read the board, wait for all 6 characters of the word binary
-    n = recv(sd,wordbuf,*numguesses,MSG_WAITALL);
+    n = recv(sd,wordbuf,MAXWORDSIZE,0);
 
     //add the null terminator
-    wordbuf[*numguesses] = 0;
+    //wordbuf[*numguesses] = 0;
 
-    printf("%d\n",*numguesses);
-    //TODO: someitmes prints out random characters
+    printf("%d\n",numguesses);
+    //TODO: sometimes prints out random characters or no characters at all
     printf("%s\n",wordbuf);
 
 }

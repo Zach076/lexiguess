@@ -32,31 +32,38 @@
  *------------------------------------------------------------------------
  */
 
+#define MAXWORDSIZE 254
 
- /*main game loop for clients*/
+
+ /*main game loop for server*/
  void play_game(char* word,int c_sd){
+     //254 so indecies should be 0-253
+     char boardbuffer[MAXWORDSIZE+1];
 
-     char buffer[sizeof(word)+1];
 
+     memset(boardbuffer,0,sizeof(boardbuffer));
+
+     //the number of guesses based on the length of the word
      uint8_t numguesses = (uint8_t)strlen(word);
+     //used to "hide" the word -> using _ instead of the characters
+     char* displayword = (char*) malloc((strlen(word)+1) * sizeof(char));
 
-     char* displayword = malloc(sizeof(word));
-
+     //the error might be here?
      for (int i = 0; i < strlen(word); ++i) {
          displayword[i] = '_';
      }
-
+     //or here?
      displayword[strlen(word)] = 0;
 
      while(numguesses > 0) {
-         //send N
+         //send N --> seems to work
          send(c_sd,&numguesses,sizeof(numguesses),0);
 
          //send board
-         sprintf(buffer,"%s",displayword);
-         buffer[strlen(word)] = 0;
+         sprintf(boardbuffer,"%s",displayword);
+         //boardbuffer[strlen(word)] = 0;
 
-         send(c_sd,buffer,strlen(displayword),0);
+         send(c_sd,boardbuffer,MAXWORDSIZE,0);
 
          //TODO remove later
          numguesses = 0;
@@ -158,23 +165,14 @@ int main(int argc, char **argv) {
       //we are in the child process.
     else if (pid == 0) {
 
-      //test: sending from the child process
-      //sprintf(buf," forked: This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
-      //send(sd2,buf,strlen(buf),0);
-
-
       //play hangman
       play_game(word,sd2);
-
-      //printf("hello from child");
 
       close(sd2);
 
       exit(EXIT_SUCCESS);
     }
-      close(sd2);
-
-
+      //close(sd2);
 
     /*
     visits++;
