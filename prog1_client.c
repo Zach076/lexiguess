@@ -29,30 +29,69 @@
 
 #define MAXWORDSIZE 254
 
+char display_board(uint8_t guesses, char* board){
+    char guess=0;
+    printf("\nBoard: %s (%d guesses left) \n", board, guesses);
+    printf("Enter guess: ");
+    scanf("%c",&guess);
+    if(guess == '\n'){
+        scanf("%c",&guess);
+    }
+    return guess;
+}
+
 /*main game loop for clients*/
 void play_game(int sd) {
 
     char guess;
     uint8_t numguesses=0;
-    
-
-    //read the number of guesses
-    int n = read(sd,&numguesses,sizeof(numguesses));
-
+    int wordlength;
+    char* sendbuffer[MAXWORDSIZE+1];
     //create a word buffer with size numguesses+1 to store the word + a null terminator
     char wordbuf[MAXWORDSIZE+1];
+
+    memset(sendbuffer,0,sizeof(sendbuffer));
     memset(wordbuf,0,sizeof(wordbuf)); //this essentially adds the null  terminator to the board for us.
 
+    //read the number of guesses
+    ssize_t n = read(sd,&numguesses,sizeof(numguesses));
+
+    wordlength = numguesses;
+
     //read the board, wait for all 6 characters of the word binary
-    n = recv(sd,wordbuf,MAXWORDSIZE,0);
+    n = recv(sd,wordbuf,numguesses,0);
 
-    //add the null terminator
-    //wordbuf[*numguesses] = 0;
+    //while not done: TODO: add checking number of underscores
+    while (numguesses > 0){
+        if(numguesses == 255) {
+            //print board
+            printf("\nBoard: %s\n",wordbuf);
+            //you win
+            printf("You win!\n");
+            //close socket
+            close(sd);
+            //exit
+            exit(EXIT_SUCCESS);
+        }
 
-    printf("%d\n",numguesses);
-    //TODO: sometimes prints out random characters or no characters at all
-    printf("%s\n",wordbuf);
+        guess = display_board(numguesses,wordbuf);
 
+        //send the character guess to the server
+        send(sd,&guess,1,0);
+
+        memset(wordbuf,0,sizeof(wordbuf));
+        n = read(sd,&numguesses,sizeof(numguesses));
+        n = recv(sd,wordbuf,wordlength,0);
+
+    }
+    //print board
+    printf("Board: %s\n",wordbuf);
+    //you lose
+    printf("You lose\n");
+    //close socket
+    close(sd);
+    //exit
+    exit(EXIT_SUCCESS);
 }
 
 int main( int argc, char **argv) {

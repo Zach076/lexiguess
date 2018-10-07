@@ -34,40 +34,77 @@
 
 #define MAXWORDSIZE 254
 
+int isWon(char* board) {
+    for(int i = 0; i < strlen(board); i++) {
+        if(board[i] == '_') {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int check_guess(char guess, char* board, char* word) {
+    int guessed = 0;
+    for(int i = 0; i < strlen(board);i++) {
+        if (guess == (board[i])) {
+            guessed = 0;
+            break;
+        } else if(guess == word[i]) {
+            guessed = 1;
+            board[i] = word[i];
+        }
+    }
+    return guessed;
+}
 
  /*main game loop for server*/
  void play_game(char* word,int c_sd){
-     //254 so indecies should be 0-253
+     //max word size is 254 so indecies should be 0-253
      char boardbuffer[MAXWORDSIZE+1];
-
-
-     memset(boardbuffer,0,sizeof(boardbuffer));
-
+     int wordlength = (int)strlen(word);
      //the number of guesses based on the length of the word
-     uint8_t numguesses = (uint8_t)strlen(word);
+     uint8_t numguesses = (uint8_t)wordlength;
      //used to "hide" the word -> using _ instead of the characters
      char* displayword = (char*) malloc((strlen(word)+1) * sizeof(char));
+     char guess;
+     int isCorrect = 0;
+     //char* guessedletters = (char*) malloc(27);
 
-     //the error might be here?
-     for (int i = 0; i < strlen(word); ++i) {
+     //memset(guessedletters,0,sizeof(guessedletters));
+     memset(boardbuffer,0,sizeof(boardbuffer));
+
+     //TODO: declare i at top of function
+     for (int i = 0; i < wordlength; ++i) {
          displayword[i] = '_';
      }
-     //or here?
-     displayword[strlen(word)] = 0;
-
+     //null terminate the board
+     displayword[wordlength] = 0;
+     //TODO: add checking if the word is solved to while loop
      while(numguesses > 0) {
          //send N --> seems to work
          send(c_sd,&numguesses,sizeof(numguesses),0);
 
-         //send board
+         //prepare to send the board
          sprintf(boardbuffer,"%s",displayword);
-         //boardbuffer[strlen(word)] = 0;
 
-         send(c_sd,boardbuffer,MAXWORDSIZE,0);
 
-         //TODO remove later
-         numguesses = 0;
+         send(c_sd,boardbuffer,(size_t)wordlength,0);//TODO: Send the board without the null terminator
+         //recieve the guess
+         recv(c_sd,&guess,1,0);
+
+         isCorrect = check_guess(guess,displayword,word);
+         if(!isCorrect) {
+             numguesses--;
+         } else if (isWon(displayword)) {
+             numguesses = 255;
+             send(c_sd,&numguesses,sizeof(numguesses),0);
+             sprintf(boardbuffer,"%s",displayword);
+             send(c_sd,boardbuffer,(size_t)wordlength,0);
+         }
      }
+     send(c_sd,&numguesses,sizeof(numguesses),0);
+     sprintf(boardbuffer,"%s",displayword);
+     send(c_sd,boardbuffer,(size_t)wordlength,0);
  }
 
 int main(int argc, char **argv) {
