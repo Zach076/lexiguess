@@ -36,7 +36,8 @@
 
 //simple check if client has won
 int isWon(char* board) {
-    for(int i = 0; i < strlen(board); i++) {
+  int i = 0;
+    for(i = 0; i < strlen(board); i++) {
         if(board[i] == '_') {
             return 0;
         }
@@ -47,7 +48,8 @@ int isWon(char* board) {
 //check if guess has been guessed or if it isnt in the word
 int check_guess(char guess, char* board, char* word) {
     int guessed = 0;
-    for(int i = 0; i < strlen(board);i++) {
+    int i = 0;
+    for(i = 0; i < strlen(board);i++) {
         if (guess == (board[i])) {
             guessed = 0;
             break;
@@ -68,25 +70,24 @@ int check_guess(char guess, char* board, char* word) {
      uint8_t numguesses = (uint8_t)wordlength;
      //used to "hide" the word -> using _ instead of the characters
      char* displayword = (char*) malloc((strlen(word)+1) * sizeof(char));
-     char guess;
-     int isCorrect = 0;
+     char guess; //guess recieved from server
+     int isCorrect = 0; //flag for if the guess is correct
+     int i; //used in for loop
 
+     //initialize empty board and fill with '_'
      memset(boardbuffer,0,sizeof(boardbuffer));
-
-     //TODO: declare i at top of function
-     for (int i = 0; i < wordlength; ++i) {
+     for (i = 0; i < wordlength; ++i) {
          displayword[i] = '_';
      }
      //null terminate the board
      displayword[wordlength] = 0;
-     //TODO: add checking if the word is solved to while loop
      while(numguesses > 0) {
          //send N --> seems to work
          send(c_sd,&numguesses,sizeof(numguesses),0);
 
          //prepare to send the board
          sprintf(boardbuffer,"%s",displayword);
-         send(c_sd,boardbuffer,(size_t)wordlength,0);//TODO: Send the board without the null terminator
+         send(c_sd,boardbuffer,(size_t)wordlength,0);
 
          //recieve the guess
          recv(c_sd,&guess,1,0);
