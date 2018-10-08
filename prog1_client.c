@@ -29,19 +29,6 @@
 
 #define MAXWORDSIZE 254
 
-/*
-char display_board2(uint8_t guesses, char* board, char* guess) {
-  if(guess == '\n') {
-    printf("\nBoard: %s (%d guesses left) \n", board, guesses);
-    printf("Enter guess: ");
-    scanf("%c",&guess);
-  } else {
-    scanf("%c",&guess);
-  }
-  return guess;
-}
-*/
-
 char display_board(uint8_t guesses, char* board){
   char guess=0;
   printf("\nBoard: %s (%d guesses left) \n", board, guesses);
@@ -55,7 +42,6 @@ char display_board(uint8_t guesses, char* board){
 
 /*main game loop for clients*/
 void play_game(int sd) {
-
   char guess;
   uint8_t numguesses=0;
   int wordlength;
@@ -82,7 +68,6 @@ void play_game(int sd) {
       exit(EXIT_SUCCESS);
     }
 
-    //guess = display_board2(numguesses,wordbuf,guess);
     guess = display_board(numguesses,wordbuf);
     //send the character guess to the server
     send(sd,&guess,1,0);

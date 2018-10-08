@@ -34,6 +34,7 @@
 
 #define MAXWORDSIZE 254
 
+//simple check if client has won
 int isWon(char* board) {
     for(int i = 0; i < strlen(board); i++) {
         if(board[i] == '_') {
@@ -43,6 +44,7 @@ int isWon(char* board) {
     return 1;
 }
 
+//check if guess has been guessed or if it isnt in the word
 int check_guess(char guess, char* board, char* word) {
     int guessed = 0;
     for(int i = 0; i < strlen(board);i++) {
@@ -68,9 +70,7 @@ int check_guess(char guess, char* board, char* word) {
      char* displayword = (char*) malloc((strlen(word)+1) * sizeof(char));
      char guess;
      int isCorrect = 0;
-     //char* guessedletters = (char*) malloc(27);
 
-     //memset(guessedletters,0,sizeof(guessedletters));
      memset(boardbuffer,0,sizeof(boardbuffer));
 
      //TODO: declare i at top of function
@@ -86,12 +86,13 @@ int check_guess(char guess, char* board, char* word) {
 
          //prepare to send the board
          sprintf(boardbuffer,"%s",displayword);
-
-
          send(c_sd,boardbuffer,(size_t)wordlength,0);//TODO: Send the board without the null terminator
+
          //recieve the guess
          recv(c_sd,&guess,1,0);
 
+         //checking guess and updating the board, if wrong, decrement guesses left
+         // if guess is correct, check if won
          isCorrect = check_guess(guess,displayword,word);
          if(!isCorrect) {
              numguesses--;
@@ -135,7 +136,6 @@ int main(int argc, char **argv) {
 
   //TODO: Set local IP address to listen to all IP addresses this server can assume. You can do it by using INADDR_ANY
   sad.sin_addr.s_addr = INADDR_ANY;
-
 
 
   if (port > 0) { /* test for illegal value */
@@ -188,34 +188,21 @@ int main(int argc, char **argv) {
       fprintf(stderr, "Error: Accept failed\n");
       exit(EXIT_FAILURE);
     }
-    //TODO fork here and implement logic
-    //int status;
-    //visits++;
-    //sprintf(buf,"This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
-    //send(sd2,buf,strlen(buf),0);
-    //close(sd2);
 
+    //TODO fork here and implement logic
     pid = fork();
     if (pid < 0) {
       perror("Error Fork() failure");
     }
-      //we are in the child process.
+    //we are in the child process.
     else if (pid == 0) {
 
-      //play hangman
+      //play Lexiguess
       play_game(word,sd2);
 
+      //at end of game close the socket and exit
       close(sd2);
-
       exit(EXIT_SUCCESS);
     }
-      //close(sd2);
-
-    /*
-    visits++;
-    sprintf(buf,"This server has been contacted %d time%s\n",visits,visits==1?".":"s.");
-    //sprintf(buf,"slam");
-    send(sd2, buf, strlen(buf),0);
-    close(sd2);*/
   }
 }
