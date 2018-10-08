@@ -1,113 +1,113 @@
 /* CSCI 367 Lexiguess: prog1_server.c
- *
- * 4 OCT 2018, Zach Richardson and Mitch Kimball
- */
+*
+* 4 OCT 2018, Zach Richardson and Mitch Kimball
+*/
 
- #include <sys/types.h>
- #include <sys/socket.h>
- #include <netinet/in.h>
- #include <netdb.h>
- #include <stdio.h>
- #include <string.h>
- #include <stdlib.h>
- #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <wait.h>
 
 #define QLEN 6 /* size of request queue */
- int visits = 0; /* counts client connections */
+int visits = 0; /* counts client connections */
 
- /*------------------------------------------------------------------------
- *  Program: demo_server
- *
- *  Purpose: allocate a socket and then repeatedly execute the following:
- *  (1) wait for the next connection from a client
- *  (2) send a short message to the client
- *  (3) close the connection
- *  (4) go back to step (1)
- *
- *  Syntax: ./demo_server port
- *
- *  port - protocol port number to use
- *
- *------------------------------------------------------------------------
- */
+/*------------------------------------------------------------------------
+*  Program: demo_server
+*
+*  Purpose: allocate a socket and then repeatedly execute the following:
+*  (1) wait for the next connection from a client
+*  (2) send a short message to the client
+*  (3) close the connection
+*  (4) go back to step (1)
+*
+*  Syntax: ./demo_server port
+*
+*  port - protocol port number to use
+*
+*------------------------------------------------------------------------
+*/
 
 #define MAXWORDSIZE 254
 
 //simple check if client has won
 int isWon(char* board) {
   int i = 0;
-    for(i = 0; i < strlen(board); i++) {
-        if(board[i] == '_') {
-            return 0;
-        }
+  for(i = 0; i < strlen(board); i++) {
+    if(board[i] == '_') {
+      return 0;
     }
-    return 1;
+  }
+  return 1;
 }
 
 //check if guess has been guessed or if it isnt in the word
 int check_guess(char guess, char* board, char* word) {
-    int guessed = 0;
-    int i = 0;
-    for(i = 0; i < strlen(board);i++) {
-        if (guess == (board[i])) {
-            guessed = 0;
-            break;
-        } else if(guess == word[i]) {
-            guessed = 1;
-            board[i] = word[i];
-        }
+  int guessed = 0;
+  int i = 0;
+  for(i = 0; i < strlen(board);i++) {
+    if (guess == (board[i])) {
+      guessed = 0;
+      break;
+    } else if(guess == word[i]) {
+      guessed = 1;
+      board[i] = word[i];
     }
-    return guessed;
+  }
+  return guessed;
 }
 
- /*main game loop for server*/
- void play_game(char* word,int c_sd){
-     //max word size is 254 so indecies should be 0-253
-     char boardbuffer[MAXWORDSIZE+1];
-     int wordlength = (int)strlen(word);
-     //the number of guesses based on the length of the word
-     uint8_t numguesses = (uint8_t)wordlength;
-     //used to "hide" the word -> using _ instead of the characters
-     char* displayword = (char*) malloc((strlen(word)+1) * sizeof(char));
-     char guess; //guess recieved from server
-     int isCorrect = 0; //flag for if the guess is correct
-     int i; //used in for loop
+/*main game loop for server*/
+void play_game(char* word,int c_sd){
+  //max word size is 254 so indecies should be 0-253
+  char boardbuffer[MAXWORDSIZE+1];
+  int wordlength = (int)strlen(word);
+  //the number of guesses based on the length of the word
+  uint8_t numguesses = (uint8_t)wordlength;
+  //used to "hide" the word -> using _ instead of the characters
+  char* displayword = (char*) malloc((strlen(word)+1) * sizeof(char));
+  char guess; //guess recieved from server
+  int isCorrect = 0; //flag for if the guess is correct
+  int i; //used in for loop
 
-     //initialize empty board and fill with '_'
-     memset(boardbuffer,0,sizeof(boardbuffer));
-     for (i = 0; i < wordlength; ++i) {
-         displayword[i] = '_';
-     }
-     //null terminate the board
-     displayword[wordlength] = 0;
-     while(numguesses > 0) {
-         //send N --> seems to work
-         send(c_sd,&numguesses,sizeof(numguesses),0);
+  //initialize empty board and fill with '_'
+  memset(boardbuffer,0,sizeof(boardbuffer));
+  for (i = 0; i < wordlength; ++i) {
+    displayword[i] = '_';
+  }
+  //null terminate the board
+  displayword[wordlength] = 0;
+  while(numguesses > 0) {
+    //send N --> seems to work
+    send(c_sd,&numguesses,sizeof(numguesses),0);
 
-         //prepare to send the board
-         sprintf(boardbuffer,"%s",displayword);
-         send(c_sd,boardbuffer,(size_t)wordlength,0);
+    //prepare to send the board
+    sprintf(boardbuffer,"%s",displayword);
+    send(c_sd,boardbuffer,(size_t)wordlength,0);
 
-         //recieve the guess
-         recv(c_sd,&guess,1,0);
+    //recieve the guess
+    recv(c_sd,&guess,1,0);
 
-         //checking guess and updating the board, if wrong, decrement guesses left
-         // if guess is correct, check if won
-         isCorrect = check_guess(guess,displayword,word);
-         if(!isCorrect) {
-             numguesses--;
-         } else if (isWon(displayword)) {
-             numguesses = 255;
-             send(c_sd,&numguesses,sizeof(numguesses),0);
-             sprintf(boardbuffer,"%s",displayword);
-             send(c_sd,boardbuffer,(size_t)wordlength,0);
-         }
-     }
-     send(c_sd,&numguesses,sizeof(numguesses),0);
-     sprintf(boardbuffer,"%s",displayword);
-     send(c_sd,boardbuffer,(size_t)wordlength,0);
- }
+    //checking guess and updating the board, if wrong, decrement guesses left
+    // if guess is correct, check if won
+    isCorrect = check_guess(guess,displayword,word);
+    if(!isCorrect) {
+      numguesses--;
+    } else if (isWon(displayword)) {
+      numguesses = 255;
+      send(c_sd,&numguesses,sizeof(numguesses),0);
+      sprintf(boardbuffer,"%s",displayword);
+      send(c_sd,boardbuffer,(size_t)wordlength,0);
+    }
+  }
+  send(c_sd,&numguesses,sizeof(numguesses),0);
+  sprintf(boardbuffer,"%s",displayword);
+  send(c_sd,boardbuffer,(size_t)wordlength,0);
+}
 
 int main(int argc, char **argv) {
   struct protoent *ptrp; /* pointer to a protocol table entry */
@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
     fprintf(stderr,"Error: Listen failed\n");
     exit(EXIT_FAILURE);
   }
-     pid_t pid; //process id of the child processes.
+  pid_t pid; //process id of the child processes.
   /* Main server loop - accept and handle requests */
   while (1) {
     alen = sizeof(cad);
