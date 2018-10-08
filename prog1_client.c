@@ -56,7 +56,7 @@ char display_board(uint8_t guesses, char* board){
 /*main game loop for clients*/
 void play_game(int sd) {
 
-  char* guess;
+  char guess;
   uint8_t numguesses=0;
   int wordlength;
 
