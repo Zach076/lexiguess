@@ -87,7 +87,7 @@ void play_game(int sd) {
     //print board
     printf("Board: %s\n",wordbuf);
     //you lose
-    printf("You lose\n");
+    printf("You lost\n");
     //close socket
     close(sd);
     //exit
