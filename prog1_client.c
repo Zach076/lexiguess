@@ -10,9 +10,11 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
+
+/*------------------------------------------------------------------------
+* Program: demo_client
+*
+* Purpose: allocate a socket, connect to a server, and
 
 /*------------------------------------------------------------------------
 * Program: demo_client
@@ -106,9 +108,9 @@ int main( int argc, char **argv) {
   }
 
   port = atoi(argv[2]); /* convert to binary */
-  if (port > 0) /* test for legal value */
-  sad.sin_port = htons((u_short)port);
-  else {
+  if (port > 0) { /* test for legal value */
+    sad.sin_port = htons((u_short)port);
+  } else {
     fprintf(stderr,"Error: bad port number %s\n",argv[2]);
     exit(EXIT_FAILURE);
   }
@@ -137,7 +139,7 @@ int main( int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  /* TODO: Connect the socket to the specified server. You have to pass correct parameters to the connect function.*/
+  /* Connect the socket to the specified server. You have to pass correct parameters to the connect function.*/
   if (connect(sd, (struct sockaddr*) &sad, sizeof(sad)) < 0) {
     fprintf(stderr,"connect failed\n");
     exit(EXIT_FAILURE);

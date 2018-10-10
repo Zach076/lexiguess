@@ -132,15 +132,15 @@ int main(int argc, char **argv) {
 
   memset((char *)&sad,0,sizeof(sad)); /* clear sockaddr structure */
 
-  //TODO: Set socket family to AF_INET
+  //: Set socket family to AF_INET
   sad.sin_family = AF_INET;
 
-  //TODO: Set local IP address to listen to all IP addresses this server can assume. You can do it by using INADDR_ANY
+  // Set local IP address to listen to all IP addresses this server can assume. You can do it by using INADDR_ANY
   sad.sin_addr.s_addr = INADDR_ANY;
 
 
   if (port > 0) { /* test for illegal value */
-    //TODO: set port number. The data type is u_short
+    // set port number. The data type is u_short
     sad.sin_port = htons(port);
   } else { /* print error message and exit */
     fprintf(stderr,"Error: Bad port number %s\n",argv[1]);
@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  /* TODO: Create a socket with AF_INET as domain, protocol type as
+  /*  Create a socket with AF_INET as domain, protocol type as
   SOCK_STREAM, and protocol as ptrp->p_proto. This call returns a socket
   descriptor named sd. */
   sd = socket(AF_INET, SOCK_STREAM, ptrp->p_proto);
@@ -168,14 +168,14 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  /* TODO: Bind a local address to the socket. For this, you need to
+  /*  Bind a local address to the socket. For this, you need to
   pass correct parameters to the bind function. */
   if (bind(sd, (struct sockaddr*) &sad, sizeof(sad)) < 0) {
     fprintf(stderr,"Error: Bind failed\n");
     exit(EXIT_FAILURE);
   }
 
-  /* TODO: Specify size of request queue. Listen take 2 parameters --
+  /*  Specify size of request queue. Listen take 2 parameters --
   socket descriptor and QLEN, which has been set at the top of this code. */
   if (listen(sd, QLEN) < 0) {
     fprintf(stderr,"Error: Listen failed\n");
@@ -190,7 +190,7 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
 
-    //TODO fork here and implement logic
+    // fork here and implement logic
     pid = fork();
     if (pid < 0) {
       perror("Error Fork() failure");
