@@ -7,7 +7,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include<netdb.h>
 
@@ -16,7 +15,7 @@
 *
 * Purpose: allocate a socket, connect to a server, and
 
-/*------------------------------------------------------------------------
+*------------------------------------------------------------------------
 * Program: demo_client
 *
 * Purpose: allocate a socket, connect to a server, and print all output
