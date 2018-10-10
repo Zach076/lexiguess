@@ -47,18 +47,27 @@ void play_game(int sd) {
   char guess;
   uint8_t numguesses=0;
   int wordlength;
+  ssize_t n;
 
   //create a word buffer with size numguesses+1 to store the word + a null terminator
   char wordbuf[MAXWORDSIZE+1];
   memset(wordbuf,0,sizeof(wordbuf)); //this essentially adds the null  terminator to the board for us.
 
   //read the number of guesses
-  ssize_t n = read(sd,&numguesses,sizeof(numguesses));
+  n = read(sd,&numguesses,sizeof(numguesses));
+  if(n != sizeof(numguesses)){
+    perror("Read Error: numguesses not read properly");
+    exit(EXIT_FAILURE);
+  }
 
   wordlength = numguesses;
 
   //read the board, wait for all characters of the secret word
   n = recv(sd,wordbuf,numguesses,0);
+  if(n != wordlength){
+    perror("Recv Error: board not read properly");
+    exit(EXIT_FAILURE);
+  }
 
   //while client still has guesses left
   while (numguesses > 0){
@@ -76,7 +85,15 @@ void play_game(int sd) {
     //get server response
     memset(wordbuf,0,sizeof(wordbuf));
     n = read(sd,&numguesses,sizeof(numguesses));
+    if(n != sizeof(numguesses)){
+      perror("Read Error: numguesses not read properly");
+      exit(EXIT_FAILURE);
+    }
     n = recv(sd,wordbuf,wordlength,0);
+    if(n != wordlength){
+      perror("Recv Error: board not read properly");
+      exit(EXIT_FAILURE);
+    }
   }
 
   //print board, you lose, close socket, and exit

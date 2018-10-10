@@ -11,7 +11,7 @@
  #include <string.h>
  #include <stdlib.h>
  #include <unistd.h>
-#include <wait.h>
+
 
 #define QLEN 6 /* size of request queue */
  int visits = 0; /* counts client connections */
@@ -46,7 +46,7 @@ int isWon(char* board) {
 }
 
 //check if guess has been guessed or if it isnt in the word
-int check_guess(char guess, char* board, char* word) {
+int check_guess(char guess, char* board, char* const word) {
     int guessed = 0;
     int i = 0;
     for(i = 0; i < strlen(board);i++) {
@@ -185,7 +185,7 @@ int main(int argc, char **argv) {
   /* Main server loop - accept and handle requests */
   while (1) {
     alen = sizeof(cad);
-    if ((sd2 = accept(sd, (struct sockaddr *)&cad, &alen)) < 0) {
+    if ((sd2 = accept(sd, (struct sockaddr *)&cad, (socklen_t*)&alen)) < 0) {
       fprintf(stderr, "Error: Accept failed\n");
       exit(EXIT_FAILURE);
     }
