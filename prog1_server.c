@@ -4,8 +4,8 @@
  */
  #include <netdb.h>
  #include <stdio.h>
- #include <string.h>
  #include <stdlib.h>
+ #include <string.h>
  #include <unistd.h>
 
 
@@ -42,13 +42,13 @@ int isWon(char* board) {
 }
 
 //check if guess has been guessed or if it isnt in the word
-int check_guess(char guess, char* board, char* const word) {
+int check_guess(char guess, char* board, const char*  word) {
     int guessed = 0;
     int i = 0;
     for(i = 0; i < strlen(board);i++) {
         if (guess == (board[i])) {
             guessed = 0;
-            break;
+            return guessed;
         } else if(guess == word[i]) {
             guessed = 1;
             board[i] = word[i];

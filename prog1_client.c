@@ -2,13 +2,12 @@
 *
 * 4 OCT 2018, Zach Richardson and Mitch Kimball
 */
-
+#include<netdb.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/socket.h>
-#include<netdb.h>
+
 
 /*------------------------------------------------------------------------
 * Program: demo_client
