@@ -1,0 +1,4 @@
+1. Mitch Kimball Zachary Richardson
+2. To the best of our knowledge, our program is working completely. We did leave a guess bug where you can type multiple letters at once. Our program treats it like they are just single characters but all in a buffer.
+3. We tested our code against the ATHINA grading script and ran multiple test games ourselves. We also followed messages through our debugger in clion to ensure they were being sent and recieved in the proper manner.
+4. The most challenging part was getting started with the Socket API and forking, as well as defining the properly sized buffers for sending messages. We had difficulty with forking becasue it can be hard to debug the errors it causes. We were having some overflow errors with our buffers at first because we haven't worked with C programming since last spring and forgot our malloc syntax.  
