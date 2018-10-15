@@ -47,12 +47,14 @@ int check_guess(char guess, char* board, const char*  word) {
     int i = 0;
     for(i = 0; i < strlen(board);i++) {
         if (guess == (board[i])) {
-            guessed = 0;
-            return guessed;
-        } else if(guess == word[i]) {
+            guessed = -1;
+        } else if(guess == word[i] && guessed == 0) {
             guessed = 1;
             board[i] = word[i];
         }
+    }
+    if(guessed == -1) {
+      guessed = 0;
     }
     return guessed;
 }
